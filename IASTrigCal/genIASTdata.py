@@ -404,3 +404,9 @@ print()
 print('[[q2_sol]]')
 print(q2_sol)
 # %%
+import pickle
+
+IASTdata = {'q1': q1_arr_data,
+            'q2': q2_arr_data}
+with open('data.pkl', 'wb') as file:
+    pickle.dump(IASTdata, file)
