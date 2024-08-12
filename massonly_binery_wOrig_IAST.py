@@ -6,6 +6,9 @@ import numpy as np
 from scipy.integrate import odeint
 import matplotlib.pyplot as plt
 import time
+from IASTrigCal import IAST_bi
+from datetime import datetime
+import pickle
 
 # %%
 # Parameters with time-related units
@@ -14,7 +17,7 @@ import time
 L = 1               # (m)
 v = 0.05             # (m/sec)
 N = 101              # -
-k_mass = [0.05, 0.05] # (1/sec) mass transfer coefficient
+k_mass = [0.1, 0.1] # (1/sec) mass transfer coefficient
 D_dif = 1E-6        # (m^2/sec) axial dispersion coeffic.
 
 # %%
@@ -38,22 +41,36 @@ C2_sta = 0*8E5/R_gas/T_gas  # (mol/m^3)
 # Isotherm model
 
 # %%
-def ex_Lang(P, iso_params):
-    denom = 1
-    numer = []
-    for iso,pp in zip(iso_params, P):
-        denom = denom + iso[1]*pp
-    for iso, pp in zip(iso_params, P):
-        numer.append(iso[0]*iso[1]*pp)
-    return (1/denom)*np.array(numer)
+def Lang(P, iso_params):
+    numer = iso_params[0]*iso_params[1]*P
+    denom =  1 + iso_params[1]*P
+    return numer / denom
 
 iso_par1 = [3,1]
 iso_par2 = [1,0.5]
+
+Lang1 = lambda P: Lang(P, iso_par1)
+Lang2 = lambda P: Lang(P, iso_par2)
+
+def iso_mix(P1, P2):
+    P_ov = P1 + P2
+    y1 = P1/P_ov
+    [q1,q2], fval = IAST_bi(Lang1, Lang2, y1, P_ov)
+    return q1, q2
+
+f_IAST = lambda p1, p2: np.array(list(map(iso_mix, p1, p2)))
+
 p_tmp = np.linspace(0,10,51)
-q_tmp = ex_Lang([p_tmp,p_tmp], [iso_par1, iso_par2])
-plt.plot(p_tmp, q_tmp[0])
-plt.plot(p_tmp, q_tmp[1])
+map_tmp = map(iso_mix, p_tmp,p_tmp)
+#q_tmp = np.array(list(map_tmp))
+
+q_tmp = f_IAST(p_tmp, p_tmp)
+
+plt.plot(p_tmp, q_tmp[:,0])
+plt.plot(p_tmp, q_tmp[:,1])
 plt.savefig('Isothermtest.png',dpi=150)
+
+
 
 # %%
 # FDM matrix generating
@@ -99,10 +116,9 @@ def massbal(y,t):
     P1 = C1*R_gas*T_gas
     P2 = C2*R_gas*T_gas
 
-    qsta = ex_Lang([P1/1E5, P2/1E5],
-            [iso_par1, iso_par2])
-    qsta1= np.array(qsta[0]) 
-    qsta2 = np.array(qsta[1])
+    qsta = f_IAST(P1/1E5, P2/1E5,)
+    qsta1 = qsta[:,0]
+    qsta2 = qsta[:,1]
     dq1dt = k_mass[0]*(qsta1 - q1)
     dq2dt = k_mass[1]*(qsta2 - q2)
 
@@ -122,15 +138,39 @@ def massbal(y,t):
 # %%
 C1_init = 0*8E5/R_gas/T_gas*np.ones(N)  # initial mol frac = 0
 C2_init = 1*8E5/R_gas/T_gas*np.ones(N)  # initial mol frac = 0
-q_scalar = ex_Lang([0,1], [iso_par1, iso_par2])
-q1_init = q_scalar[0]*np.ones(N)
-q2_init = q_scalar[1]*np.ones(N)
+P_init = (C1_init + C2_init)*R_gas*T_gas
+y1_init = C1_init/(C1_init + C2_init)
+q_scalar = f_IAST(y1_init*P_init, (1-y1_init)*P_init)
+q1_init = q_scalar[:,0]
+q2_init = q_scalar[:,1]
 
 # %%
 # Solve PDE
-y0 = np.concatenate((C1_init,C2_init, q1_init, q2_init))
-t_test =np.linspace(0,200,1001)
+tic = time.time()
+y0 = np.concatenate((C1_init, C2_init, q1_init, q2_init))
+t_test =np.linspace(0,200,4001)
 y_res = odeint(massbal, y0, t_test)
+toc = time.time() - tic
+
+# %%
+# Save the output and log 
+
+# %%
+
+now = datetime
+now_date  = now.date()
+#print('CPU time : ', toc/60, 'min')
+fnamCPU = 'run'+ str(now.date())+'_01.txt'
+fnamPick = 'run'+ str(now.date())+'_01.pkl'
+
+f = open(fnamCPU, 'w')
+f.write(str(now) + '\n{0:.3f} min'.format(toc/60))
+f.close()
+
+f = open(fnamPick, 'wb')
+pickle.dump(y_res, fnamPick,)
+f.close()
+
 
 # %% 
 # Sorting Results
