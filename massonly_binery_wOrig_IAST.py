@@ -157,7 +157,7 @@ toc = time.time() - tic
 
 # %%
 
-now = datetime
+now = datetime.now()
 now_date  = now.date()
 #print('CPU time : ', toc/60, 'min')
 fnamCPU = 'run'+ str(now.date())+'_01.txt'
@@ -168,7 +168,7 @@ f.write(str(now) + '\n{0:.3f} min'.format(toc/60))
 f.close()
 
 f = open(fnamPick, 'wb')
-pickle.dump(y_res, fnamPick,)
+pickle.dump(y_res, f,)
 f.close()
 
 
