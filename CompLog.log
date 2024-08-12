@@ -1,4 +1,0 @@
-  File "/home/sga/github/UOUTEST/run_Sensi_v01.py", line 8
-    vv in v_list:
-                ^
-SyntaxError: invalid syntax

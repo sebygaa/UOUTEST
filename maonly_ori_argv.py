@@ -162,8 +162,8 @@ toc = time.time() - tic
 now = datetime.now()
 now_date  = now.date()
 #print('CPU time : ', toc/60, 'min')
-fnamCPU = 'run'+ str(now.date())+'_v'+ argv[1]+'_k'+ argv[2] + '.txt'
-fnamPick = 'run'+ str(now.date())+'_v'+argv[1]+ '_k'+argv[2] + '.pkl'
+fnamCPU = 'run'+ str(now.date())+'_v'+ sys.argv[1]+'_k'+ sys.argv[2] + '.txt'
+fnamPick = 'run'+ str(now.date())+'_v'+sys.argv[1]+ '_k'+sys.argv[2] + '.pkl'
 
 f = open(fnamCPU, 'w')
 f.write(str(now) + '\n{0:.3f} min'.format(toc/60))
