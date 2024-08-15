@@ -1,6 +1,7 @@
 import os
 import numpy as np
 from datetime import datetime
+from move2dir import move
 k_list = [0.001, 0.002, 0.005, 0.01, 0.02]
 v_list = [0.001, 0.002, 0.005, 0.01]
 
@@ -11,3 +12,5 @@ for kk in k_list:
     for vv in v_list:
         os.system('nohup python maonly_ori_argv.py '+ str(vv)+ ' ' + str(kk) +
                 '> v' +str(vv)+'k' +str(kk) + '.log &') 
+
+move('res_oriIAST')
