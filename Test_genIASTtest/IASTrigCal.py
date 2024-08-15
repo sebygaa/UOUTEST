@@ -287,7 +287,7 @@ class PredLinIAST2D:
 
         y_diff = y1_targ- y1_ran
         P_diff = P_targ - P_ran
-
+         
         i_1 = np.argmin(y_diff**2)
         i_2 = np.argmin(P_diff**2)
 
@@ -308,7 +308,7 @@ class PredLinIAST2D:
         q12 = q1_arr_data[i_1, i_2+1]
         q21 = q1_arr_data[i_1+1, i_2]
         q22 = q1_arr_data[i_1+1, i_2+1]
-
+        
         q1_sol = interLinIAST2D(y1_targ,P_targ,
                             y_list,P_list,
                             q11,q12,q21,q22)
