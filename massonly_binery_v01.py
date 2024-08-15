@@ -122,7 +122,7 @@ def massbal(y,t):
 # %%
 C1_init = 0*8E5/R_gas/T_gas*np.ones(N)  # initial mol frac = 0
 C2_init = 1*8E5/R_gas/T_gas*np.ones(N)  # initial mol frac = 0
-q_scalar = ex_Lang([0,1], [iso_par1, iso_par2])
+q_scalar = ex_Lang([0,8], [iso_par1, iso_par2])
 q1_init = q_scalar[0]*np.ones(N)
 q2_init = q_scalar[1]*np.ones(N)
 
@@ -179,3 +179,5 @@ plt.ylabel('Concentration 1 (mol/m$^{3}$)')
 plt.xlabel('Axial distance (m)')
 plt.grid(linestyle = ':', linewidth = 0.7)
 plt.savefig('q1_Profile.png', dpi = 150)
+
+# %%

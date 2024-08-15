@@ -138,9 +138,9 @@ def massbal(y,t):
 # %%
 C1_init = 0*8E5/R_gas/T_gas*np.ones(N)  # initial mol frac = 0
 C2_init = 1*8E5/R_gas/T_gas*np.ones(N)  # initial mol frac = 0
-P_init = (C1_init + C2_init)*R_gas*T_gas
-y1_init = C1_init/(C1_init + C2_init)
-q_scalar = f_IAST(y1_init*P_init, (1-y1_init)*P_init)
+P_init = (C1_init + C2_init)*R_gas*T_gas # in (Pa)
+y1_init = C1_init/(C1_init + C2_init)   # mol/mol
+q_scalar = f_IAST(y1_init*P_init/1e5, (1-y1_init)*P_init/1e5) # mol/kg
 q1_init = q_scalar[:,0]
 q2_init = q_scalar[:,1]
 
@@ -148,7 +148,7 @@ q2_init = q_scalar[:,1]
 # Solve PDE
 tic = time.time()
 y0 = np.concatenate((C1_init, C2_init, q1_init, q2_init))
-t_test =np.linspace(0,200,4001)
+t_test =np.linspace(0,800,8001)
 y_res = odeint(massbal, y0, t_test)
 toc = time.time() - tic
 

@@ -40,7 +40,6 @@ epsi = 0.3          # (m^3/m^3) void frac
 C1_sta = 1*8E5/R_gas/T_gas  # (mol/m^3)
 C2_sta = 0*8E5/R_gas/T_gas  # (mol/m^3)
 
-
 # %%
 # Isotherm model
 
@@ -73,17 +72,14 @@ def iso_mix(P1, P2):
 f_IAST = lambda p1, p2: np.array(list(map(iso_mix, p1, p2)))
 
 p_tmp = np.linspace(0,10,51)
-map_tmp = map(iso_mix, p_tmp,p_tmp)
+#map_tmp = map(iso_mix, p_tmp,p_tmp)
 #q_tmp = np.array(list(map_tmp))
 
-q_tmp = f_IAST(p_tmp, p_tmp)
+#q_tmp = f_IAST(p_tmp, p_tmp)
 
-plt.plot(p_tmp, q_tmp[:,0])
-plt.plot(p_tmp, q_tmp[:,1])
-plt.savefig('Isothermtest.png',dpi=150)
-
-
-
+#plt.plot(p_tmp, q_tmp[:,0])
+#plt.plot(p_tmp, q_tmp[:,1])
+#plt.savefig('Isothermtest.png',dpi=150)
 
 # %%
 # FDM matrix generating
@@ -97,8 +93,8 @@ d = d0+d1
 d[0,0] = 0
 d[-1,-1] = 0
 d[-1, -2] = 0
-print('d = ')
-print(d)
+#print('d = ')
+#print(d)
 
 dd0 = np.diag(1/h_arr[1:]**2, k=-1)
 dd1 = np.diag(-2/h_arr**2)
@@ -107,8 +103,8 @@ dd =dd0 + dd1 + dd2
 dd[0,:] = 0
 dd[-1,-2] = 1/h**2
 dd[-1,-1] = 1/h**2
-print('dd=')
-print(dd)
+#print('dd=')
+#print(dd)
 
 # %%
 # ODE equation in function form 
@@ -151,9 +147,9 @@ def massbal(y,t):
 # %%
 C1_init = 0*8E5/R_gas/T_gas*np.ones(N)  # initial mol frac = 0
 C2_init = 1*8E5/R_gas/T_gas*np.ones(N)  # initial mol frac = 0
-P_init = (C1_init + C2_init)*R_gas*T_gas
+P_init = (C1_init + C2_init)*R_gas*T_gas # in (Pa)
 y1_init = C1_init/(C1_init + C2_init)
-q_scalar = f_IAST(y1_init*P_init, (1-y1_init)*P_init)
+q_scalar = f_IAST(y1_init*P_init/1e5, (1-y1_init)*P_init/1e5)
 q1_init = q_scalar[:,0]
 q2_init = q_scalar[:,1]
 
@@ -161,7 +157,7 @@ q2_init = q_scalar[:,1]
 # Solve PDE
 tic = time.time()
 y0 = np.concatenate((C1_init, C2_init, q1_init, q2_init))
-t_test =np.linspace(0,200,4001)
+t_test =np.linspace(0,800,8001)
 y_res = odeint(massbal, y0, t_test)
 toc = time.time() - tic
 
@@ -173,8 +169,8 @@ toc = time.time() - tic
 now = datetime.now()
 now_date  = now.date()
 #print('CPU time : ', toc/60, 'min')
-fnamCPU = 'run'+ str(now.date())+'_v'+ sys.argv[1]+'_k'+ sys.argv[2] + '.txt'
-fnamPick = 'run'+ str(now.date())+'_v'+sys.argv[1]+ '_k'+sys.argv[2] + '.pkl'
+fnamCPU = 'run_ex'+ str(now.date())+'_v'+ sys.argv[1]+'_k'+ sys.argv[2] + '.txt'
+fnamPick = 'run_ex'+ str(now.date())+'_v'+sys.argv[1]+ '_k'+sys.argv[2] + '.pkl'
 
 f = open(fnamCPU, 'w')
 f.write(str(now) + '\n{0:.3f} min'.format(toc/60))

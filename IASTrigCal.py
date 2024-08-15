@@ -228,6 +228,7 @@ def interLinIAST2D(x1_targ, x2_targ, x1_minmax, x2_minmax,
                 f11,f12,f21,f22):
     x_x1 = (x1_targ - x1_minmax[0])/(x1_minmax[1]-x1_minmax[0])
     x_x2 = (x2_targ - x2_minmax[0])/(x2_minmax[1]-x2_minmax[0])
+
     # First  dim. reduction 
     f_sol_x1 = (1-x_x1)*f11 + x_x1*f21
     f_sol_x2 = (1-x_x1)*f12 + x_x1*f22

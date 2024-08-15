@@ -35,25 +35,29 @@ def iso2(P):
 # %%
 # y1 and P domain
 # %%
-y1_dom = np.linspace(0,1,51)
+y1_dom = np.linspace(0,1,101)
 P_dom_low = np.linspace(0,1,26)
-P_dom_high = np.linspace(1,30,30)
-P_dom = np.concatenate([P_dom_low, P_dom_high])
+P_dom_high = np.linspace(1,30,60)
+P_dom = np.concatenate([P_dom_low, P_dom_high[1:]])
+# %%
+# File Name
+# %%
+f_nam = 'IAST_da.pkl'
 # %%
 # Generate IAST data
-f_nam = 'IAST_da.pkl'
-
+'''
 tic = time.time()
 genIASTdata2D(iso1, iso2, y1_dom, P_dom, file_name=f_nam)
 toc = time.time()-tic
 print('CPU time = {0:.2f} min'.format(toc/60))
+'''
 
 # %%
 # Define a interpolation model
 # %% 
 q_model = PredLinIAST2D(file_name = f_nam)
 # %%
-P_test = np.linspace(0,10)
+P_test = np.linspace(0,10,51)
 q1_test,q2_test = q_model.predict(0.1, 2)
 q1_list = []
 q2_list = []
@@ -61,5 +65,14 @@ for pp in P_test:
     q1_tmp,q2_tmp = q_model.predict(0.1, pp)
     q1_list.append(q1_tmp)
     q2_list.append(q2_tmp)
+
 # %%
-# Graph
+# Visualization
+plt.plot(P_test, q1_list, linewidth = 2,
+         label ='q1')
+plt.plot(P_test, q2_list, linewidth = 2,
+         label='q2')
+plt.legend(fontsize = 13)
+
+
+# %%

@@ -291,9 +291,9 @@ class PredLinIAST2D:
         i_1 = np.argmin(y_diff**2)
         i_2 = np.argmin(P_diff**2)
 
-        if y_diff[i_1] < 0:
+        if y_diff[i_1] < -1e-6:
             i_1 = i_1 - 1
-        if P_diff[i_2] < 0:
+        if P_diff[i_2] < -1e-6:
             i_2 =i_2 - 1
         
         y1_1 = y1_ran[i_1]
