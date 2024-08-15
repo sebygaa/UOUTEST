@@ -228,6 +228,7 @@ def interLinIAST2D(x1_targ, x2_targ, x1_minmax, x2_minmax,
                 f11,f12,f21,f22):
     x_x1 = (x1_targ - x1_minmax[0])/(x1_minmax[1]-x1_minmax[0])
     x_x2 = (x2_targ - x2_minmax[0])/(x2_minmax[1]-x2_minmax[0])
+
     # First  dim. reduction 
     f_sol_x1 = (1-x_x1)*f11 + x_x1*f21
     f_sol_x2 = (1-x_x1)*f12 + x_x1*f22
@@ -285,8 +286,8 @@ class PredLinIAST2D:
         q1_arr_data = self.q1
         q2_arr_data = self.q2
 
-        y_diff = y1_targ- y1_ran
-        P_diff = P_targ - P_ran
+        y_diff = y1_targ- y1_ran[:-1]
+        P_diff = P_targ - P_ran[:-1]
 
         i_1 = np.argmin(y_diff**2)
         i_2 = np.argmin(P_diff**2)

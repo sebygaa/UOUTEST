@@ -3,10 +3,12 @@
 
 # %%
 import numpy as np
+import sys
 from scipy.integrate import odeint
 import matplotlib.pyplot as plt
 import time
 from IASTrigCal import IAST_bi, PredLinIAST2D
+
 from datetime import datetime
 import pickle
 
@@ -15,9 +17,10 @@ import pickle
 
 # %%
 L = 1               # (m)
-v = 0.05             # (m/sec)
+v = float(sys.argv[1])             # (m/sec) Default=0.05
 N = 101              # -
-k_mass = [0.1, 0.1] # (1/sec) mass transfer coefficient
+MTC_input = float(sys.argv[2]) # Default = 0.1 (1/sec)
+k_mass = [MTC_input, MTC_input] # mass transfer coefficient
 D_dif = 1E-6        # (m^2/sec) axial dispersion coeffic.
 
 # %%
@@ -41,24 +44,6 @@ C2_sta = 0*8E5/R_gas/T_gas  # (mol/m^3)
 # Isotherm model
 
 # %%
-'''
-def Lang(P, iso_params):
-    numer = iso_params[0]*iso_params[1]*P
-    denom =  1 + iso_params[1]*P
-    return numer / denom
-
-iso_par1 = [3,1]
-iso_par2 = [1,0.5]
-
-Lang1 = lambda P: Lang(P, iso_par1)
-Lang2 = lambda P: Lang(P, iso_par2)
-
-def iso_mix(P1, P2):
-    P_ov = P1 + P2
-    y1 = P1/P_ov
-    [q1,q2], fval = IAST_bi(Lang1, Lang2, y1, P_ov)
-    return q1, q2
-'''
 f_nam = "IAST_da.pkl"
 q_inter = PredLinIAST2D(f_nam)
 def iso_mix(P1, P2):
@@ -68,16 +53,6 @@ def iso_mix(P1, P2):
     return q1, q2
 
 f_IAST = lambda p1, p2: np.array(list(map(iso_mix, p1, p2)))
-
-p_tmp = np.linspace(0,10,51)
-#map_tmp = map(iso_mix, p_tmp,np.zeros_like(p_tmp))
-#q_tmp = np.array(list(map_tmp))
-
-#q_tmp = f_IAST(p_tmp, p_tmp)
-
-#plt.plot(p_tmp, q_tmp[:,0])
-#plt.plot(p_tmp, q_tmp[:,1])
-#plt.savefig('Isothermtest.png',dpi=150)
 
 # %%
 # FDM matrix generating
@@ -147,9 +122,9 @@ C1_init = 0*8E5/R_gas/T_gas*np.ones(N)  # initial mol frac = 0
 C2_init = 1*8E5/R_gas/T_gas*np.ones(N)  # initial mol frac = 0
 P_init = (C1_init + C2_init)*R_gas*T_gas
 y1_init = C1_init/(C1_init + C2_init)
-q_scalar = f_IAST(y1_init*P_init/1e5, (1-y1_init)*P_init/1e5)
-q1_init = q_scalar[:,0]
-q2_init = q_scalar[:,1]
+q_init = f_IAST(y1_init*P_init/1e5, (1-y1_init)*P_init/1e5)
+q1_init = q_init[:,0]
+q2_init = q_init[:,1]
 
 # %%
 # Solve PDE
@@ -167,8 +142,8 @@ toc = time.time() - tic
 now = datetime.now()
 now_date  = now.date()
 #print('CPU time : ', toc/60, 'min')
-fnamCPU = 'run_LinInt'+ str(now.date())+'_01.txt'
-fnamPick = 'run_LinInt'+ str(now.date())+'_01.pkl'
+fnamCPU = 'run_LinInt'+ str(now.date())+'_v'+ sys.argv[1]+'_k'+ sys.argv[2] + '.txt'
+fnamPick = 'run_LinInt'+ str(now.date())+'_v'+sys.argv[1]+ '_k'+sys.argv[2] + '.pkl'
 
 f = open(fnamCPU, 'w')
 f.write(str(now) + '\n{0:.3f} min'.format(toc/60))
@@ -178,7 +153,7 @@ f = open(fnamPick, 'wb')
 pickle.dump(y_res, f,)
 f.close()
 
-
+'''
 # %% 
 # Sorting Results
 C1_res = y_res[:,0:N]
@@ -195,7 +170,7 @@ lstyle = ['-','--','-.',(0,(3,3,1,3,1,3)),':',]
 cline = 0
 C_res = C1_res
 z = L*np.linspace(0,1,N)
-for i in range(0,len(t_test),200):
+for i in range(0,len(t_test),100):
     plt.plot(z,C_res[i,:],
     color = 'k', linestyle = lstyle[cline%len(lstyle)],
     label = 't = {0:4.2f}'.format(t_test[i]))
@@ -216,7 +191,7 @@ lstyle = ['-','--','-.',(0,(3,3,1,3,1,3)),':',]
 cline = 0
 q_res = q1_res
 z = L*np.linspace(0,1,N)
-for i in range(0,len(t_test),200):
+for i in range(0,len(t_test),100):
     plt.plot(z,q_res[i,:],
     color = 'k', linestyle = lstyle[cline%len(lstyle)],
     label = 't = {0:4.2f}'.format(t_test[i]))
@@ -226,5 +201,4 @@ plt.ylabel('Concentration 1 (mol/m$^{3}$)')
 plt.xlabel('Axial distance (m)')
 plt.grid(linestyle = ':', linewidth = 0.7)
 plt.savefig('q1_Profile.png', dpi = 150)
-
-# %%
+'''

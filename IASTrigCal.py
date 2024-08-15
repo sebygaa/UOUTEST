@@ -286,8 +286,8 @@ class PredLinIAST2D:
         q1_arr_data = self.q1
         q2_arr_data = self.q2
 
-        y_diff = y1_targ- y1_ran
-        P_diff = P_targ - P_ran
+        y_diff = y1_targ- y1_ran[:-1]
+        P_diff = P_targ - P_ran[:-1]
 
         i_1 = np.argmin(y_diff**2)
         i_2 = np.argmin(P_diff**2)
