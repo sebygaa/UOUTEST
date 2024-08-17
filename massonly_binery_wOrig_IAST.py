@@ -15,9 +15,9 @@ import pickle
 
 # %%
 L = 1               # (m)
-v = 0.05             # (m/sec)
+v = 0.01             # (m/sec)
 N = 101              # -
-k_mass = [0.1, 0.1] # (1/sec) mass transfer coefficient
+k_mass = [0.001, 0.001] # (1/sec) mass transfer coefficient
 D_dif = 1E-6        # (m^2/sec) axial dispersion coeffic.
 
 # %%
@@ -148,7 +148,7 @@ q2_init = q_scalar[:,1]
 # Solve PDE
 tic = time.time()
 y0 = np.concatenate((C1_init, C2_init, q1_init, q2_init))
-t_test =np.linspace(0,800,8001)
+t_test =np.linspace(0,0.5,21)
 y_res = odeint(massbal, y0, t_test)
 toc = time.time() - tic
 
@@ -160,8 +160,8 @@ toc = time.time() - tic
 now = datetime.now()
 now_date  = now.date()
 #print('CPU time : ', toc/60, 'min')
-fnamCPU = 'run'+ str(now.date())+'_01.txt'
-fnamPick = 'run'+ str(now.date())+'_01.pkl'
+fnamCPU = 'res'+ str(now.date())+'_01.txt'
+fnamPick = 'res'+ str(now.date())+'_01.pkl'
 
 f = open(fnamCPU, 'w')
 f.write(str(now) + '\n{0:.3f} min'.format(toc/60))

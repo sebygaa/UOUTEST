@@ -12,7 +12,8 @@ import seaborn as sns
 # %%
 # File path
 # %%
-f_path = 'res_IAST_orig'
+#f_path = 'res_IAST_orig'
+f_path = 'res_oriIAST24081616'
 f_path = 'res_oriIAST24081616'
 #base_path = os.getcwd()
 base_path = os.path.dirname(__file__)
@@ -85,7 +86,7 @@ print(v_list)
 print(k_list)
 
 di_CPUmin = {}
-di_CPUmin['velocity (m/s)'] = v_list
+di_CPUmin['MTC (1/s)'] = k_list
  
 #print(input_list)
 
@@ -130,7 +131,7 @@ countt = 0
 for kk, cpuu in zip(k_list, CPU_minu_mat):
     di_CPUmin[str(kk)] = cpuu
 df_CPUmin = pd.DataFrame(di_CPUmin)
-df_CPUmin.set_index(keys=['velocity (m/s)'], inplace=True, drop=True)
+df_CPUmin.set_index(keys=['MTC (1/s)'], inplace=True, drop=True)
 print(df_CPUmin)
 
 os.chdir(base_path)
@@ -176,7 +177,7 @@ print(pkl_conv_test)
 
 CONV_mat = np.zeros([len(v_list),len(k_list)])
 di_CONV = {}
-di_CONV['velocity (m/s)'] = v_list
+di_CONV['MTC (1/s)'] = k_list
 
 CONV_list = []
 ind_list_pkl = []
@@ -207,9 +208,7 @@ for pkk,inpp in zip(pkl_list, input_list_pkl):
     ind_list_pkl.append([i_locate, j_locate])
     CONV_mat[i_locate, j_locate] = conv_tmp
 
-
 print(CONV_mat)
-
 os.chdir(base_path)
 # %%
 CPU_av = np.sum(np.sum(CPU_minu_mat*CONV_mat))
