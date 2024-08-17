@@ -80,7 +80,7 @@ print(v_list)
 print(k_list)
 
 di_CPUmin = {}
-di_CPUmin['velocity (m/s)'] = v_list
+di_CPUmin['velocity (m/s)'] = k_list
  
 #print(input_list)
 
@@ -99,8 +99,8 @@ for ff,inpp in zip(txt_list, input_list):
     r = open(ff,'r')
     line1 = r.readline()
     line2 = r.readline()
-    #print(line1)
-    #print(line2)
+    print(line1)
+    print(line2)
     ii_end = 0
     for ii,ll in enumerate(line2):
         if ll == 'm':
