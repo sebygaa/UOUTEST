@@ -1,0 +1,2 @@
+/home/sga/github/UOUTEST/maonly_ori_argv.py:144: ODEintWarning: Excess work done on this call (perhaps wrong Dfun type). Run with full_output = 1 to get quantitative information.
+  y_res = odeint(massbal, y0, t_test)

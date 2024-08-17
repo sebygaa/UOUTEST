@@ -148,7 +148,7 @@ fnamCPU = 'res_lin'+ str(now.date())+'_v'+ sys.argv[1]+'_k'+ sys.argv[2] + '.txt
 fnamPick = 'res_lin'+ str(now.date())+'_v'+sys.argv[1]+ '_k'+sys.argv[2] + '.pkl'
 
 f = open(fnamCPU, 'w')
-f.write(str(now) + '\n{0:.3f} min'.format(toc/60))
+f.write(str(now) + '\n{0:.6f} min'.format(toc/60))
 f.close()
 
 f = open(fnamPick, 'wb')
