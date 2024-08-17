@@ -9,6 +9,7 @@ import time
 from IASTrigCal import IAST_bi
 from datetime import datetime
 import pickle
+import winsound as sd
 
 # %%
 # Parameters with time-related units
@@ -219,3 +220,7 @@ plt.ylabel('Concentration 1 (mol/m$^{3}$)')
 plt.xlabel('Axial distance (m)')
 plt.grid(linestyle = ':', linewidth = 0.7)
 plt.savefig('q1_Profile_ori.png', dpi = 150)
+
+for ii in range(4):
+    sd.Beep(1000,1000)
+    print("END")
