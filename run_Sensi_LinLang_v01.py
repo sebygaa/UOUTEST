@@ -19,7 +19,8 @@ for kk in k_list:
         os.system('nohup python maonly_LinInter_argv.py '+ str(vv)+ ' ' + str(kk) +
                 '> v' +str(vv)+'k' +str(kk) + '.log &') 
         if cc%4 == 3:
-            time.sleep(60)
-
-move('res_extLan')
+            time.sleep(6)
+    cc = cc+1
+time.sleep(1)
+move('res_linLan')
 #os.chdir(base_path)

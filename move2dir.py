@@ -13,6 +13,8 @@ def move(dir_prefix):
         os.mkdir(dirnam)
     for nn in dir_list:
         if nn[-4:] == '.pkl':
+            if nn[-6:-4] == 'da':
+                continue
             print(nn, ' is moved to ',dirnam)
             shutil.move(nn, os.path.join(dirnam,nn))
         if nn[-4:] == '.txt':
