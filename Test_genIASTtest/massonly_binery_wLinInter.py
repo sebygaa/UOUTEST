@@ -9,7 +9,7 @@ import time
 from IASTrigCal import IAST_bi, PredLinIAST2D
 from datetime import datetime
 import pickle
-
+import winsound as sd
 # %%
 # Parameters with time-related units
 
@@ -17,7 +17,7 @@ import pickle
 L = 1               # (m)
 v = 0.05             # (m/sec)
 N = 101              # -
-k_mass = [0.1, 0.1] # (1/sec) mass transfer coefficient
+k_mass = [0.01, 0.01] # (1/sec) mass transfer coefficient
 D_dif = 1E-6        # (m^2/sec) axial dispersion coeffic.
 
 # %%
@@ -70,14 +70,6 @@ def iso_mix(P1, P2):
 f_IAST = lambda p1, p2: np.array(list(map(iso_mix, p1, p2)))
 
 p_tmp = np.linspace(0,10,51)
-#map_tmp = map(iso_mix, p_tmp,np.zeros_like(p_tmp))
-#q_tmp = np.array(list(map_tmp))
-
-#q_tmp = f_IAST(p_tmp, p_tmp)
-
-#plt.plot(p_tmp, q_tmp[:,0])
-#plt.plot(p_tmp, q_tmp[:,1])
-#plt.savefig('Isothermtest.png',dpi=150)
 
 # %%
 # FDM matrix generating
@@ -155,7 +147,7 @@ q2_init = q_scalar[:,1]
 # Solve PDE
 tic = time.time()
 y0 = np.concatenate((C1_init, C2_init, q1_init, q2_init))
-t_test =np.linspace(0,800,8001)
+t_test =np.linspace(0,2,81)
 y_res = odeint(massbal, y0, t_test)
 toc = time.time() - tic
 
@@ -195,7 +187,7 @@ lstyle = ['-','--','-.',(0,(3,3,1,3,1,3)),':',]
 cline = 0
 C_res = C1_res
 z = L*np.linspace(0,1,N)
-for i in range(0,len(t_test),200):
+for i in range(0,len(t_test),10):
     plt.plot(z,C_res[i,:],
     color = 'k', linestyle = lstyle[cline%len(lstyle)],
     label = 't = {0:4.2f}'.format(t_test[i]))
@@ -204,8 +196,8 @@ plt.legend(loc = [1.03, 0.02])
 plt.ylabel('Concentration 1 (mol/m$^{3}$)')
 plt.xlabel('Axial distance (m)')
 plt.grid(linestyle = ':', linewidth = 0.7)
-plt.savefig('C1_Profile.png', dpi = 150)
-
+plt.savefig('C1_Profile.png', dpi = 150, bbox_inches='tight')
+plt.show()
 
 # %%
 # Graph for q1
@@ -216,7 +208,7 @@ lstyle = ['-','--','-.',(0,(3,3,1,3,1,3)),':',]
 cline = 0
 q_res = q1_res
 z = L*np.linspace(0,1,N)
-for i in range(0,len(t_test),200):
+for i in range(0,len(t_test),10):
     plt.plot(z,q_res[i,:],
     color = 'k', linestyle = lstyle[cline%len(lstyle)],
     label = 't = {0:4.2f}'.format(t_test[i]))
@@ -225,6 +217,7 @@ plt.legend(loc = [1.03, 0.02])
 plt.ylabel('Concentration 1 (mol/m$^{3}$)')
 plt.xlabel('Axial distance (m)')
 plt.grid(linestyle = ':', linewidth = 0.7)
-plt.savefig('q1_Profile.png', dpi = 150)
+plt.savefig('q1_Profile.png', dpi = 150, bbox_inches='tight')
 
+for ii in range(5):sd.Beep(1500,1000)
 # %%
