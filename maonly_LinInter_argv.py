@@ -18,11 +18,13 @@ import pickle
 # %%
 L = 1               # (m)
 v = float(sys.argv[1])             # (m/sec) Default=0.05
-N = 101              # -
+N = 21              # -
 MTC_input = float(sys.argv[2]) # Default = 0.1 (1/sec)
 k_mass = [MTC_input, MTC_input] # mass transfer coefficient
 D_dif = 1E-6        # (m^2/sec) axial dispersion coeffic.
 
+t_end = 3.0
+N_time = 301
 # %%
 # Parma. w/o time term
 
@@ -130,7 +132,7 @@ q2_init = q_init[:,1]
 # Solve PDE
 tic = time.time()
 y0 = np.concatenate((C1_init, C2_init, q1_init, q2_init))
-t_test =np.linspace(0,800,8001)
+t_test =np.linspace(0,t_end, N_time)
 y_res = odeint(massbal, y0, t_test)
 toc = time.time() - tic
 
@@ -142,8 +144,8 @@ toc = time.time() - tic
 now = datetime.now()
 now_date  = now.date()
 #print('CPU time : ', toc/60, 'min')
-fnamCPU = 'run_LinInt'+ str(now.date())+'_v'+ sys.argv[1]+'_k'+ sys.argv[2] + '.txt'
-fnamPick = 'run_LinInt'+ str(now.date())+'_v'+sys.argv[1]+ '_k'+sys.argv[2] + '.pkl'
+fnamCPU = 'res_lin'+ str(now.date())+'_v'+ sys.argv[1]+'_k'+ sys.argv[2] + '.txt'
+fnamPick = 'res_lin'+ str(now.date())+'_v'+sys.argv[1]+ '_k'+sys.argv[2] + '.pkl'
 
 f = open(fnamCPU, 'w')
 f.write(str(now) + '\n{0:.3f} min'.format(toc/60))

@@ -16,11 +16,15 @@ import winsound as sd
 
 # %%
 L = 1               # (m)
-v = 0.01             # (m/sec)
-N = 101              # -
-k_mass = [0.0001, 0.0001] # (1/sec) mass transfer coefficient
-D_dif = 1E-6        # (m^2/sec) axial dispersion coeffic.
+v = 0.0025             # (m/sec)
+v = 2.5e-3
+N = 21              # -
+#k_mass = [0.000005, 0.000005] # (1/sec) mass transfer coefficient
+k_mass = [1E-7, 1E-7] # (1/sec) mass transfer coefficient
+D_dif = 1E-6        # (m^s2/sec) axial dispersion coeffic.
 
+t_end = 3.0
+N_time = 301
 # %%
 # Parma. w/o time term
 
@@ -70,7 +74,7 @@ q_tmp = f_IAST(p_tmp, p_tmp)
 plt.plot(p_tmp, q_tmp[:,0])
 plt.plot(p_tmp, q_tmp[:,1])
 #plt.savefig('Isothermtest.png',dpi=150)
-plt.show()
+#plt.show()
 
 
 # %%
@@ -149,7 +153,7 @@ q2_init = q_scalar[:,1]
 # Solve PDE
 tic = time.time()
 y0 = np.concatenate((C1_init, C2_init, q1_init, q2_init))
-t_test =np.linspace(0,0.1,201)
+t_test =np.linspace(0,t_end,N_time)
 y_res = odeint(massbal, y0, t_test)
 toc = time.time() - tic
 
@@ -189,7 +193,7 @@ lstyle = ['-','--','-.',(0,(3,3,1,3,1,3)),':',]
 cline = 0
 C_res = C1_res
 z = L*np.linspace(0,1,N)
-for i in range(0,len(t_test),100):
+for i in range(0,len(t_test),20):
     plt.plot(z,C_res[i,:],
     color = 'k', linestyle = lstyle[cline%len(lstyle)],
     label = 't = {0:4.2f}'.format(t_test[i]))
@@ -210,7 +214,7 @@ lstyle = ['-','--','-.',(0,(3,3,1,3,1,3)),':',]
 cline = 0
 q_res = q1_res
 z = L*np.linspace(0,1,N)
-for i in range(0,len(t_test),100):
+for i in range(0,len(t_test),20):
     plt.plot(z,q_res[i,:],
     color = 'k', linestyle = lstyle[cline%len(lstyle)],
     label = 't = {0:4.2f}'.format(t_test[i]))

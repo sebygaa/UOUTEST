@@ -2,7 +2,7 @@ import os
 import numpy as np
 from datetime import datetime
 from move2dir import move
-k_list = [0.001, 0.002, 0.005, 0.01, 0.02]
+k_list = [1e-9, 1e-8, 1e-7, 1e-6, 1e-5]
 v_list = [0.001, 0.002, 0.005, 0.01]
 
 a = datetime.now()

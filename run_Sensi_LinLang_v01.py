@@ -16,7 +16,7 @@ aa = a.strftime("%Y%m%d%H")
 cc = 0
 for kk in k_list:
     for vv in v_list:
-        os.system('nohup python maonly_extLang_argv.py '+ str(vv)+ ' ' + str(kk) +
+        os.system('nohup python maonly_LinInter_argv.py '+ str(vv)+ ' ' + str(kk) +
                 '> v' +str(vv)+'k' +str(kk) + '.log &') 
         if cc%4 == 3:
             time.sleep(60)
