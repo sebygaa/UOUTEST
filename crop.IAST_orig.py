@@ -219,6 +219,20 @@ Toto = np.sum(np.sum(CONV_mat))
 print(CPU_av/Toto)
 #print(Toto)
 # %%
+from matplotlib.colors import ListedColormap, BoundaryNorm
+from matplotlib.colors import LogNorm, Normalize
+sel_col = ['#ba001e','#d80019','#f32b1d','#ff502b','#ff7c3c','#ffa84e','#ffcb6c','#ffe992','#fcfeb3','#e4f693','#c6ea74','#a0de5c','#68cb57','#39be56','#00b14d','#00893e','#006b31']
+sel_colmap = ListedColormap(sel_col)
+sel_norm = list(range(0, 100, 10))
+sel_norm = BoundaryNorm(sel_norm, ncolors=len(sel_col))
+
+#sns.heatmap(df_CPUmin, annot=True, fmt='.3f',
+#            cmap = sel_colmap, norm = LogNorm(),
+#            cbar = True
+#            )
+
 sns.heatmap(df_CPUmin, annot=True, fmt='.3f',
-            cmap = 'PiYG')
+            cmap = 'Blues', norm = LogNorm(),
+            cbar = True
+            )
 # %%
