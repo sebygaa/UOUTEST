@@ -130,11 +130,12 @@ for ff,inpp in zip(txt_list, input_list):
     CPU_minu_mat[i_locate, j_locate] = CPUtime_tmp
 
 countt = 0
-for kk, cpuu in zip(k_list, CPU_minu_mat):
-    di_CPUmin[str(kk)] = cpuu
+for vv, cpuu in zip(v_list, CPU_minu_mat):
+    di_CPUmin['v=' + str(vv)] = cpuu
 df_CPUmin = pd.DataFrame(di_CPUmin)
 df_CPUmin.set_index(keys=['MTC (1/s)'], inplace=True, drop=True)
 print(df_CPUmin)
+
 
 os.chdir(base_path)
 # %%
@@ -163,7 +164,7 @@ def pkl2vk(pkl_tmp):
 def pkl2conv(pkl_tmp):
     f = open(pkl_tmp, 'rb')
     y_res = pickle.load(f)
-    y_sample = y_res[-10, 0]
+    y_sample = y_res[-10, 2]
     conv_bool = True
     if y_sample < 0.001:
         conv_bool = False
@@ -217,4 +218,7 @@ CPU_av = np.sum(np.sum(CPU_minu_mat*CONV_mat))
 Toto = np.sum(np.sum(CONV_mat))
 print(CPU_av/Toto)
 #print(Toto)
+# %%
+sns.heatmap(df_CPUmin, annot=True, fmt='.3f',
+            cmap = 'PiYG')
 # %%
