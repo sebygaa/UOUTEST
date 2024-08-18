@@ -13,8 +13,9 @@ import seaborn as sns
 # File path
 # %%
 #f_path = 'res_IAST_orig'
-f_path = 'res_oriIAST24081616'
-f_path = 'res_oriIAST24081616'
+#f_path = 'res_oriIAST24081616'
+#f_path = 'res_oriIAST24081616'
+f_path = 'res_oriLang24081816'
 #base_path = os.getcwd()
 base_path = os.path.dirname(__file__)
 
@@ -36,6 +37,7 @@ for fff in fnam_list:
         pkl_list.append(fff)
     else:
         other_list.append(fff)
+print('Exceptional files (no pickle no txt)')
 print(other_list)
 os.chdir(base_path)
 
