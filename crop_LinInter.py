@@ -15,7 +15,8 @@ import seaborn as sns
 #f_path = 'res_IAST_orig'
 #f_path = 'res_oriIAST24081616'
 #f_path = 'res_oriIAST24081616'
-f_path = 'res_oriLang24081816'
+#f_path = 'res_oriLang24081816'
+f_path = 'res_intLang24081718'
 #base_path = os.getcwd()
 base_path = os.path.dirname(__file__)
 

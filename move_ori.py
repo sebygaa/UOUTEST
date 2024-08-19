@@ -1,2 +1,2 @@
 from move2dir import move
-move('res_ori')
+move('res_oriLang')

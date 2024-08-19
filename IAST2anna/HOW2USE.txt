@@ -1,0 +1,15 @@
+STEP 1:
+(Lookpu Table 만들기)
+genIAST_test.py
+
+STEP 2:
+(Senstivity analysis 실행 for v & k)
+run_Sensi_LinLang_v01.py
+
+STEP 3:
+(결과 정리: 한 폴더에 넣기)
+move_lin.py
+
+STEP 4:
+(결과확인: Jupyter notebook -> 계산시간/수렴성 확인)
+crop_linInterLang.ipynb

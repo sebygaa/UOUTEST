@@ -13,13 +13,8 @@ aa = a.strftime("%Y%m%d%H")
 #dirnam = 'res_IAST_or_'+ aa
 #os.mkdir(dirnam)
 #os.chdir(dirnam)
-cc = 0
+
 for kk in k_list:
     for vv in v_list:
         os.system('nohup python maonly_extLang_argv.py '+ str(vv)+ ' ' + str(kk) +
                 '> v' +str(vv)+'k' +str(kk) + '.log &') 
-        if cc%4 == 3:
-            time.sleep(60)
-
-move('res_extLan')
-#os.chdir(base_path)
