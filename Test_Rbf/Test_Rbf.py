@@ -1,6 +1,7 @@
 # %%
 from scipy.interpolate import Rbf
 import os
+import numpy as np
 import pickle
 # %%
 f = open('IAST_da.pkl', 'rb')
@@ -26,8 +27,23 @@ for ii, pp in enumerate(y1):
         P_list.append(pp)
         y1_list.append(yy)
         q1_list.append(q1_tmp)
-        q2_list.append()
+        q2_list.append(q2_tmp)
         
 # %%
-q1_rbf = Rbf(P,y1,q1)
-#q2_rbf = Rbf()
+q1_rbf = Rbf(P_list,y1_list,q1_list)
+q2_rbf = Rbf(P_list,y1_list,q2_list)
+
+# %%
+P_ran = np.linspace(0, 10, 21)
+y1_test = 0.3*np.ones([21,])
+
+q1_test = q1_rbf(P_ran, y1_test)
+q2_test = q2_rbf(P_ran, y1_test)
+# %%
+import matplotlib.pyplot as plt
+# %%
+plt.plot(P_ran, q1_test, 'k-', label = 'q1')
+plt.plot(P_ran, q1_test, 'r--',label = 'q2')
+plt.legend(fontsize = 14,)
+plt.show()
+# %%
