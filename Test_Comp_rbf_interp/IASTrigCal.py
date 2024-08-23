@@ -395,7 +395,10 @@ class PredQuaIAST2D:
             i_1 = i_1 - 1
         if P_diff[i_2] < 0:
             i_2 =i_2 - 1
-        
+        if i_1 == len(y_diff)-1:
+            i_1 = i_1 - 2
+        if i_2 == len(P_diff)-1:
+            i_2 = i_2 - 2
         y1_1 = y1_ran[i_1]
         y1_2 = y1_ran[i_1+1]
         y1_3 = y1_ran[i_1+2]

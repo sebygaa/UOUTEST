@@ -228,12 +228,41 @@ def interLinIAST2D(x1_targ, x2_targ, x1_minmax, x2_minmax,
                 f11,f12,f21,f22):
     x_x1 = (x1_targ - x1_minmax[0])/(x1_minmax[1]-x1_minmax[0])
     x_x2 = (x2_targ - x2_minmax[0])/(x2_minmax[1]-x2_minmax[0])
+
     # First  dim. reduction 
     f_sol_x1 = (1-x_x1)*f11 + x_x1*f21
     f_sol_x2 = (1-x_x1)*f12 + x_x1*f22
     # second dim. reduction
     f_sol = (1-x_x2)*f_sol_x1 + x_x2*f_sol_x2
     return f_sol
+
+def determ(x_len3):
+    x1,x2,x3 = x_len3
+    det_res = 1/(x1-x2)/(x1-x3)/(x2-x3)
+    return det_res
+
+def interQuad(x_targ, x_len3, y_len3):
+    x1,x2,x3 = x_len3
+    y1,y2,y3 = y_len3
+    d_tmp = determ(x_len3)
+    a_tmp = d_tmp*((x3-x1)*(y2-y1) - (x2-x1)*(y3-y1))
+    b_tmp = d_tmp*(-(x3-x1)**2*(y2-y1)+(x2-x1)**2*(y3-y1))
+    y_pred = a_tmp*(x_targ-x1)**2 + b_tmp*(x_targ-x1) + y1
+    return y_pred
+
+def interQuaIAST2D(x1_targ, x2_targ, 
+                   x1_da, x2_da,
+                   f11,f12,f13,f21,f22,f23,f31,f32,f33):
+    
+    # First  dim. reduction 
+    f_sol_x1 = interQuad(x1_targ, x1_da, [f11,f21,f31])
+    f_sol_x2 = interQuad(x1_targ, x1_da, [f12,f22,f32])
+    f_sol_x3 = interQuad(x1_targ, x1_da, [f13,f23,f33])
+    
+    # second dim. reduction
+    f_sol = interQuad(x2_targ, x2_da, [f_sol_x1, f_sol_x2, f_sol_x3])
+    return f_sol
+
 
 # %%
 # interLinIAST3D
@@ -287,13 +316,13 @@ class PredLinIAST2D:
 
         y_diff = y1_targ- y1_ran[:-1]
         P_diff = P_targ - P_ran[:-1]
-         
+
         i_1 = np.argmin(y_diff**2)
         i_2 = np.argmin(P_diff**2)
 
-        if y_diff[i_1] < -1e-6:
+        if y_diff[i_1] < 0:
             i_1 = i_1 - 1
-        if P_diff[i_2] < -1e-6:
+        if P_diff[i_2] < 0:
             i_2 =i_2 - 1
         
         y1_1 = y1_ran[i_1]
@@ -308,7 +337,7 @@ class PredLinIAST2D:
         q12 = q1_arr_data[i_1, i_2+1]
         q21 = q1_arr_data[i_1+1, i_2]
         q22 = q1_arr_data[i_1+1, i_2+1]
-        
+
         q1_sol = interLinIAST2D(y1_targ,P_targ,
                             y_list,P_list,
                             q11,q12,q21,q22)
@@ -323,6 +352,97 @@ class PredLinIAST2D:
                             y_list,P_list,
                             q11,q12,q21,q22)
         return q1_sol, q2_sol
+# %%
+# PredLinIAST2D
+# %%
+#with open('data.pkl', 'rb') as file:
+#    IASTdata = pickle.load(file)
+
+#y1_ran = np.linspace(0,1,50+1)
+#P_ran = np.linspace(0,25,10+1)
+
+#q1_arr_data = IASTdata['q1']
+#q2_arr_data = IASTdata['q2']
+
+class PredQuaIAST2D:
+    def __init__(self, file_name='genIASTdata2D.pkl'):
+        with open(file_name, 'rb') as file:
+            IASTdata = pickle.load(file)
+        y1_ran = IASTdata['y1']
+        P_ran = IASTdata['P']
+        q1_arr_data = IASTdata['q1']
+        q2_arr_data = IASTdata['q2']
+        
+        self.y1 = y1_ran
+        self.P = P_ran 
+        self.q1 = q1_arr_data
+        self.q2 = q2_arr_data
+        del(IASTdata)
+        
+    def predict(self, y1_targ,P_targ,):
+        y1_ran = self.y1
+        P_ran = self.P
+        q1_arr_data = self.q1
+        q2_arr_data = self.q2
+
+        y_diff = y1_targ- y1_ran[:-1]
+        P_diff = P_targ - P_ran[:-1]
+
+        i_1 = np.argmin(y_diff**2)
+        i_2 = np.argmin(P_diff**2)
+
+        if y_diff[i_1] < 0:
+            i_1 = i_1 - 1
+        if P_diff[i_2] < 0:
+            i_2 =i_2 - 1
+        if i_1 == len(y_diff)-1:
+            i_1 = i_1 - 2
+        if i_2 == len(P_diff)-1:
+            i_2 = i_2 - 2
+        y1_1 = y1_ran[i_1]
+        y1_2 = y1_ran[i_1+1]
+        y1_3 = y1_ran[i_1+2]
+        y_list = [y1_1, y1_2, y1_3]
+
+        P_1 = P_ran[i_2]
+        P_2 = P_ran[i_2+1]
+        P_3 = P_ran[i_2+2]
+        P_list = [P_1, P_2, P_3]
+        # q1: interLinIAST2D
+        q11 = q1_arr_data[i_1, i_2]
+        q12 = q1_arr_data[i_1, i_2+1]
+        q13 = q1_arr_data[i_1, i_2+2]
+        q21 = q1_arr_data[i_1+1, i_2]
+        q22 = q1_arr_data[i_1+1, i_2+1]
+        q23 = q1_arr_data[i_1+1, i_2+2]
+        q31 = q1_arr_data[i_1+2, i_2]
+        q32 = q1_arr_data[i_1+2, i_2+1]
+        q33 = q1_arr_data[i_1+2, i_2+2]
+
+        q1_sol = interQuaIAST2D(y1_targ,P_targ,
+                            y_list,P_list,
+                            q11,q12,q13,
+                            q21,q22,q23,
+                            q31,q32,q33)
+        
+        # q2: interLinIAST2D
+        q11 = q2_arr_data[i_1, i_2]
+        q12 = q2_arr_data[i_1, i_2+1]
+        q13 = q2_arr_data[i_1, i_2+2]
+        q21 = q2_arr_data[i_1+1, i_2]
+        q22 = q2_arr_data[i_1+1, i_2+1]
+        q23 = q2_arr_data[i_1+1, i_2+2]
+        q31 = q2_arr_data[i_1+2, i_2]
+        q32 = q2_arr_data[i_1+2, i_2+1]
+        q33 = q2_arr_data[i_1+2, i_2+2]
+
+        q2_sol = interQuaIAST2D(y1_targ,P_targ,
+                            y_list,P_list,
+                            q11,q12,q13,
+                            q21,q22,q23,
+                            q31,q32,q33)
+        return q1_sol, q2_sol
+    
 
 
 # %%
@@ -334,6 +454,7 @@ class PredLinIAST2D:
 #[TEST 5] gridupdate
 #[TEST 6] gridsearch
 #[TEST 7] IAST_bi
+#[TEST 8] interQuad & interQua2D
 
 # %%
 ## TEST CODE 1: iso2pi
@@ -453,3 +574,63 @@ if __name__ == '__main__':
     print('pi_error = ')
     print(fval_test)
 # %%
+# TEST 7: Test interQuad & Test interQuaIAST2D
+# %%
+if __name__ =='__main__':
+    # 1D data quadratic spline
+    x_ran = np.linspace(0,4)
+    y_ran = x_ran**2 - 4*x_ran + 1
+    ii_list = [1, 22, 35]
+    x_pick = []
+    y_pick = []
+    for ii in ii_list:
+        x_pick.append(x_ran[ii])
+        y_pick.append(y_ran[ii])
+    x_target = 1.4
+    # Here is Prediction
+    y_predict = interQuad(x_target, x_pick, y_pick)
+    # Plot !
+    import matplotlib.pyplot as plt
+    plt.plot(x_ran, y_ran, label = 'Equation')
+    plt.plot(x_pick, y_pick, 'bo', label = 'Sample')
+    plt.plot(x_target, y_predict, 'ro', label = 'Predict')
+    plt.legend(fontsize = 13)
+    # 2D data quadratic spline
+    x_ran = np.linspace(0,4)
+    y_ran = np.linspace(0,4)
+    z_ran = np.zeros([len(x_ran), len(y_ran)])
+    for ii, xx in enumerate(x_ran):
+        for jj, yy in enumerate(y_ran):
+            z_tmp = xx**2 -xx+ yy**2-4*yy-4
+            z_ran[ii,jj]=z_tmp
+    #z_ran = np.array(z_list)
+    ii1_list = [3,10, 14]
+    ii2_list = [3,10, 14]
+    x_pick = []
+    y_pick = []
+    
+    for ii,jj in zip(ii1_list,ii2_list):
+        x_pick.append(x_ran[ii])
+        y_pick.append(y_ran[jj])
+    
+    z_mat = np.zeros([3,3])
+    for ien, ii in enumerate(ii1_list):
+        for jen, jj in enumerate(ii2_list):
+            z_mat[ien,jen] = z_ran[ii,jj]
+    # x1 = ii1_list[0] = 3
+    f11, f21, f31 = z_mat[0,:]
+    # x1 = ii1_list[1] = 10
+    f12, f22, f32 = z_mat[1,:]
+    # x1 = ii1_list[2] = 14
+    f13, f23, f33 = z_mat[2,:]
+    
+    x_target = 1.4
+    y_target = 1.2
+    f_predict = interQuaIAST2D(x_target, y_target, x_pick, y_pick,
+                               f11,f12,f13,f21,f22,f23,f31,f32,f33)
+    x_me, y_me = np.meshgrid(x_ran, y_ran)
+    fig, ax = plt.subplots(subplot_kw={'projection':'3d'})
+    surf =ax.plot_surface(x_me, y_me, z_ran)
+    ax.plot3D(x_target,y_target, f_predict, 'ro')
+    ax.view_init(-15, -65)
+    
