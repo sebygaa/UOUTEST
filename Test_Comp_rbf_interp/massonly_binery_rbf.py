@@ -12,6 +12,7 @@ import pickle
 import winsound as sd
 
 from scipy.interpolate import Rbf
+from scipy.interpolate import RBFInterpolator
 
 # %%
 # Parameters with time-related units
@@ -74,6 +75,14 @@ for ii, yy in enumerate(y1):
         
 q1_rbf = Rbf(P_list,y1_list,q1_list, function = 'cubic')
 q2_rbf = Rbf(P_list,y1_list,q2_list, function = 'cubic')
+
+#q1_rbf = Rbf(P_list,y1_list,q1_list)
+#q2_rbf = Rbf(P_list,y1_list,q2_list)
+
+#q1_rbf = RBFInterpolator(np.array([P_list,y1_list]),
+#                         np.array([q1_list,q2_list]),)
+#q2_rbf = RBFInterpolator(np.array([P_list,y1_list]),
+#                         np.array(q2_list),)
 
 def iso_mix(P1, P2):
     P_ov = P1+P2+1E-7
