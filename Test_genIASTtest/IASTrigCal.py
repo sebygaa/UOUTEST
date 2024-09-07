@@ -129,7 +129,7 @@ def IAST_bi(fun1, fun2, y1, P):
     is_comp_err = False
     try:
         x_est_0 = [0.5]
-        opt_res = minimize(obj_err, x_est_0,)
+        opt_res = minimize(obj_err, x_est_0,method = 'nelder-mead')
         fval = opt_res.fun
         
         if opt_res.fun > 1E-2:
@@ -416,50 +416,76 @@ class PredLinIAST3D:
         self.q2 = q2_arr_data
         del(IASTdata)
         
-    def predict(self, y1_targ,P_targ,):
+    def predict(self, y1_targ, P_targ, T_targ):
+        T_ran = self.T
         y1_ran = self.y1
         P_ran = self.P
-        T_ran = self.T
+        
         q1_arr_data = self.q1
         q2_arr_data = self.q2
 
+        T_diff = T_targ - T_ran[:-1]
         y_diff = y1_targ- y1_ran[:-1]
         P_diff = P_targ - P_ran[:-1]
 
-        i_1 = np.argmin(y_diff**2)
-        i_2 = np.argmin(P_diff**2)
+        i_1 = np.argmin(T_diff**2)
+        i_2 = np.argmin(y_diff**2)
+        i_3 = np.argmin(P_diff**2)
 
-        if y_diff[i_1] < 0:
-            i_1 = i_1 - 1
-        if P_diff[i_2] < 0:
-            i_2 =i_2 - 1
+        if T_diff[i_1] < 0:
+            i_1 = i_1 -1
+        if y_diff[i_2] < 0:
+            i_2 = i_2 - 1
+        if P_diff[i_3] < 0:
+            i_3 =i_3 - 1
         
-        y1_1 = y1_ran[i_1]
-        y1_2 = y1_ran[i_1+1]
+        T_1 = T_ran[i_1]
+        T_2 = T_ran[i_2]
+        T_list = [T_1, T_2]
+
+        y1_1 = y1_ran[i_2]
+        y1_2 = y1_ran[i_2+1]
         y_list = [y1_1, y1_2]
 
-        P_1 = P_ran[i_2]
-        P_2 = P_ran[i_2+1]
+        P_1 = P_ran[i_3]
+        P_2 = P_ran[i_3+1]
         P_list = [P_1, P_2]
-        # q1: interLinIAST2D
-        q11 = q1_arr_data[i_1, i_2]
-        q12 = q1_arr_data[i_1, i_2+1]
-        q21 = q1_arr_data[i_1+1, i_2]
-        q22 = q1_arr_data[i_1+1, i_2+1]
+        # q1: interLinIAST3D
+        # T1
+        q11T1 = q1_arr_data[i_1, i_2, i_3]
+        q12T1 = q1_arr_data[i_1, i_2, i_3+1]
+        q21T1 = q1_arr_data[i_1, i_2+1, i_3]
+        q22T1 = q1_arr_data[i_1, i_2+1, i_3+1]
+        q_T1 = [q11T1,q12T1,q21T1,q22T1]
+        # T2
+        q11T2 = q1_arr_data[i_1+1, i_2, i_3]
+        q12T2 = q1_arr_data[i_1+1, i_2, i_3+1]
+        q21T2 = q1_arr_data[i_1+1, i_2+1, i_3]
+        q22T2 = q1_arr_data[i_1+1, i_2+1, i_3+1]
+        q_T2 = [q11T2,q12T2,q21T2,q22T2]
 
-        q1_sol = interLinIAST2D(y1_targ,P_targ,
-                            y_list,P_list,
-                            q11,q12,q21,q22)
+        q1_sol = interLinIAST3D(y1_targ,P_targ, T_targ,
+                                y_list,P_list,T_list,
+                                q_T1, q_T2)
         
         # q2: interLinIAST2D
-        q11 = q2_arr_data[i_1, i_2]
-        q12 = q2_arr_data[i_1, i_2+1]
-        q21 = q2_arr_data[i_1+1, i_2]
-        q22 = q2_arr_data[i_1+1, i_2+1]
+        # T1
+        q11T1 = q2_arr_data[i_1, i_2, i_3]
+        q12T1 = q2_arr_data[i_1, i_2, i_3+1]
+        q21T1 = q2_arr_data[i_1, i_2+1, i_3]
+        q22T1 = q2_arr_data[i_1, i_2+1, i_3+1]
+        q_T1 = [q11T1,q12T1,q21T1,q22T1]
+        # T2
+        q11T2 = q2_arr_data[i_1+1, i_2, i_3]
+        q12T2 = q2_arr_data[i_1+1, i_2, i_3+1]
+        q21T2 = q2_arr_data[i_1+1, i_2+1, i_3]
+        q22T2 = q2_arr_data[i_1+1, i_2+1, i_3+1]
+        q_T2 = [q11T2,q12T2,q21T2,q22T2]
 
-        q2_sol = interLinIAST2D(y1_targ,P_targ,
-                            y_list,P_list,
-                            q11,q12,q21,q22)
+        q2_sol = interLinIAST3D(y1_targ, P_targ, T_targ,
+                                y_list,P_list,T_list,
+                                q_T1, q_T2)
+
         return q1_sol, q2_sol
     
 # %%
