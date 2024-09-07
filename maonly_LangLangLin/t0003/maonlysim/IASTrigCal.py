@@ -352,6 +352,73 @@ class PredLinIAST2D:
                             y_list,P_list,
                             q11,q12,q21,q22)
         return q1_sol, q2_sol
+
+# %%
+# PredLinIAST3D
+# %%
+class PredLinIAST3D:
+    def __init__(self, file_name='genIASTdata3D.pkl'):
+        with open(file_name, 'rb') as file:
+            IASTdata = pickle.load(file)
+        y1_ran = IASTdata['y1']
+        P_ran = IASTdata['P']
+        T_ran = IASTdata['T']
+        q1_arr_data = IASTdata['q1']
+        q2_arr_data = IASTdata['q2']
+        
+        self.y1 = y1_ran
+        self.P = P_ran 
+        self.T = T_ran
+        self.q1 = q1_arr_data
+        self.q2 = q2_arr_data
+        del(IASTdata)
+        
+    def predict(self, y1_targ,P_targ,):
+        y1_ran = self.y1
+        P_ran = self.P
+        T_ran = self.T
+        q1_arr_data = self.q1
+        q2_arr_data = self.q2
+
+        y_diff = y1_targ- y1_ran[:-1]
+        P_diff = P_targ - P_ran[:-1]
+
+        i_1 = np.argmin(y_diff**2)
+        i_2 = np.argmin(P_diff**2)
+
+        if y_diff[i_1] < 0:
+            i_1 = i_1 - 1
+        if P_diff[i_2] < 0:
+            i_2 =i_2 - 1
+        
+        y1_1 = y1_ran[i_1]
+        y1_2 = y1_ran[i_1+1]
+        y_list = [y1_1, y1_2]
+
+        P_1 = P_ran[i_2]
+        P_2 = P_ran[i_2+1]
+        P_list = [P_1, P_2]
+        # q1: interLinIAST2D
+        q11 = q1_arr_data[i_1, i_2]
+        q12 = q1_arr_data[i_1, i_2+1]
+        q21 = q1_arr_data[i_1+1, i_2]
+        q22 = q1_arr_data[i_1+1, i_2+1]
+
+        q1_sol = interLinIAST2D(y1_targ,P_targ,
+                            y_list,P_list,
+                            q11,q12,q21,q22)
+        
+        # q2: interLinIAST2D
+        q11 = q2_arr_data[i_1, i_2]
+        q12 = q2_arr_data[i_1, i_2+1]
+        q21 = q2_arr_data[i_1+1, i_2]
+        q22 = q2_arr_data[i_1+1, i_2+1]
+
+        q2_sol = interLinIAST2D(y1_targ,P_targ,
+                            y_list,P_list,
+                            q11,q12,q21,q22)
+        return q1_sol, q2_sol
+    
 # %%
 # PredLinIAST2D
 # %%
