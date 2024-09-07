@@ -6,8 +6,8 @@ import numpy as np
 import sys, os
 
 from scipy.integrate import odeint
-from IASTrigCal import IAST_bi, PredLinIAST2D
-from maonlysim.TargIsotherm import f_IAST
+#from IASTrigCal import IAST_bi, PredLinIAST3D
+from TargIsotherm import f_IAST
 import pickle
 
 import matplotlib.pyplot as plt
@@ -73,6 +73,7 @@ dd[-1,-1] = 1/h**2
 # ODE equation in function form 
 
 # %%
+T_sys = 300*np.ones(N)
 def massbal(y,t):
     C1 = y[0:N]
     C2 = y[1*N:2*N]
@@ -87,7 +88,7 @@ def massbal(y,t):
     P1 = C1*R_gas*T_gas
     P2 = C2*R_gas*T_gas
 
-    qsta = f_IAST(P1/1E5, P2/1E5,)
+    qsta = f_IAST(P1/1E5, P2/1E5,T_sys)
     qsta1 = qsta[:,0]
     qsta2 = qsta[:,1]
     dq1dt = k_mass[0]*(qsta1 - q1)
@@ -109,7 +110,8 @@ C1_init = 0*8E5/R_gas/T_gas*np.ones(N)  # initial mol frac = 0
 C2_init = 1*8E5/R_gas/T_gas*np.ones(N)  # initial mol frac = 0
 P_init = (C1_init + C2_init)*R_gas*T_gas
 y1_init = C1_init/(C1_init + C2_init)
-q_init = f_IAST(y1_init*P_init/1e5, (1-y1_init)*P_init/1e5)
+T_init = 300*np.ones(N)
+q_init = f_IAST(y1_init*P_init/1e5, (1-y1_init)*P_init/1e5, T_init)
 q1_init = q_init[:,0]
 q2_init = q_init[:,1]
 

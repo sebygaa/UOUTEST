@@ -129,7 +129,7 @@ def IAST_bi(fun1, fun2, y1, P):
     is_comp_err = False
     try:
         x_est_0 = [0.5]
-        opt_res = minimize(obj_err, x_est_0,)
+        opt_res = minimize(obj_err, x_est_0,method = 'nelder-mead')
         fval = opt_res.fun
         
         if opt_res.fun > 1E-2:
@@ -217,6 +217,49 @@ def genIASTdata2D(iso1, iso2, y1_ran, P_ran,
                 'q2': q2_arr_data,
                 'y1': y1_ran,
                 'P': P_ran}
+    with open(file_name, 'wb') as file:
+        pickle.dump(IASTdata, file)
+# %%
+# Generate and Interpolation-based surrogate model
+# %%
+
+def genIASTdata3D(iso1, iso2, y1_ran, P_ran, T_ran,
+                file_name='genIASTdata2D.pkl'):
+    # y1_ran = np.linspace(0,1,50+1)
+    # P_ran = np.linspace(0,25,10+1)
+    q1_list = []
+    q2_list = []
+
+    for TT in T_ran:
+        iso1_fixT = lambda ppp: iso1(ppp,TT)
+        iso2_fixT = lambda ppp: iso2(ppp,TT)
+        q1_tmp_fixT = []
+        q2_tmp_fixT = []
+
+        for yy in y1_ran:
+            q1_tmp_list = []
+            q2_tmp_list = []
+            for PP in P_ran:
+                [q1_tmp, q2_tmp], fval = IAST_bi(iso1_fixT, iso2_fixT,
+                                                yy, PP)
+                if fval > 1E-2:
+                    print('[Warnning] pi/RT err = ', fval)
+                    print('at y1=', yy, 'P=',PP)
+                q1_tmp_list.append(q1_tmp)
+                q2_tmp_list.append(q2_tmp)
+
+            q1_tmp_fixT.append(q1_tmp_list)
+            q2_tmp_fixT.append(q2_tmp_list)
+        q1_list.append(q1_tmp_fixT)
+        q2_list.append(q2_tmp_fixT)
+
+    q1_arr_data = np.array(q1_list)
+    q2_arr_data = np.array(q2_list)
+    IASTdata = {'q1': q1_arr_data,
+                'q2': q2_arr_data,
+                'y1': y1_ran,
+                'P': P_ran,
+                'T': T_ran,}
     with open(file_name, 'wb') as file:
         pickle.dump(IASTdata, file)
 
@@ -352,6 +395,99 @@ class PredLinIAST2D:
                             y_list,P_list,
                             q11,q12,q21,q22)
         return q1_sol, q2_sol
+
+# %%
+# PredLinIAST3D
+# %%
+class PredLinIAST3D:
+    def __init__(self, file_name='genIASTdata3D.pkl'):
+        with open(file_name, 'rb') as file:
+            IASTdata = pickle.load(file)
+        y1_ran = IASTdata['y1']
+        P_ran = IASTdata['P']
+        T_ran = IASTdata['T']
+        q1_arr_data = IASTdata['q1']
+        q2_arr_data = IASTdata['q2']
+        
+        self.y1 = y1_ran
+        self.P = P_ran 
+        self.T = T_ran
+        self.q1 = q1_arr_data
+        self.q2 = q2_arr_data
+        del(IASTdata)
+        
+    def predict(self, y1_targ, P_targ, T_targ):
+        T_ran = self.T
+        y1_ran = self.y1
+        P_ran = self.P
+        
+        q1_arr_data = self.q1
+        q2_arr_data = self.q2
+
+        T_diff = T_targ - T_ran[:-1]
+        y_diff = y1_targ- y1_ran[:-1]
+        P_diff = P_targ - P_ran[:-1]
+
+        i_1 = np.argmin(T_diff**2)
+        i_2 = np.argmin(y_diff**2)
+        i_3 = np.argmin(P_diff**2)
+
+        if T_diff[i_1] < 0:
+            i_1 = i_1 -1
+        if y_diff[i_2] < 0:
+            i_2 = i_2 - 1
+        if P_diff[i_3] < 0:
+            i_3 =i_3 - 1
+        
+        T_1 = T_ran[i_1]
+        T_2 = T_ran[i_1+1]
+        T_list = [T_1, T_2]
+
+        y1_1 = y1_ran[i_2]
+        y1_2 = y1_ran[i_2+1]
+        y_list = [y1_1, y1_2]
+
+        P_1 = P_ran[i_3]
+        P_2 = P_ran[i_3+1]
+        P_list = [P_1, P_2]
+        # q1: interLinIAST3D
+        # T1
+        q11T1 = q1_arr_data[i_1, i_2, i_3]
+        q12T1 = q1_arr_data[i_1, i_2, i_3+1]
+        q21T1 = q1_arr_data[i_1, i_2+1, i_3]
+        q22T1 = q1_arr_data[i_1, i_2+1, i_3+1]
+        q_T1 = [q11T1,q12T1,q21T1,q22T1]
+        # T2
+        q11T2 = q1_arr_data[i_1+1, i_2, i_3]
+        q12T2 = q1_arr_data[i_1+1, i_2, i_3+1]
+        q21T2 = q1_arr_data[i_1+1, i_2+1, i_3]
+        q22T2 = q1_arr_data[i_1+1, i_2+1, i_3+1]
+        q_T2 = [q11T2,q12T2,q21T2,q22T2]
+
+        q1_sol = interLinIAST3D(y1_targ,P_targ, T_targ,
+                                y_list,P_list,T_list,
+                                q_T1, q_T2)
+        
+        # q2: interLinIAST2D
+        # T1
+        q11T1 = q2_arr_data[i_1, i_2, i_3]
+        q12T1 = q2_arr_data[i_1, i_2, i_3+1]
+        q21T1 = q2_arr_data[i_1, i_2+1, i_3]
+        q22T1 = q2_arr_data[i_1, i_2+1, i_3+1]
+        q_T1 = [q11T1,q12T1,q21T1,q22T1]
+        # T2
+        q11T2 = q2_arr_data[i_1+1, i_2, i_3]
+        q12T2 = q2_arr_data[i_1+1, i_2, i_3+1]
+        q21T2 = q2_arr_data[i_1+1, i_2+1, i_3]
+        q22T2 = q2_arr_data[i_1+1, i_2+1, i_3+1]
+        q_T2 = [q11T2,q12T2,q21T2,q22T2]
+
+        q2_sol = interLinIAST3D(y1_targ, P_targ, T_targ,
+                                y_list,P_list,T_list,
+                                q_T1, q_T2)
+
+        return q1_sol, q2_sol
+    
 # %%
 # PredLinIAST2D
 # %%
@@ -395,7 +531,10 @@ class PredQuaIAST2D:
             i_1 = i_1 - 1
         if P_diff[i_2] < 0:
             i_2 =i_2 - 1
-        
+        if i_1 == len(y_diff)-1:
+            i_1 = i_1 - 2
+        if i_2 == len(P_diff)-1:
+            i_2 = i_2 - 2
         y1_1 = y1_ran[i_1]
         y1_2 = y1_ran[i_1+1]
         y1_3 = y1_ran[i_1+2]

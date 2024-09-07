@@ -440,7 +440,7 @@ class PredLinIAST3D:
             i_3 =i_3 - 1
         
         T_1 = T_ran[i_1]
-        T_2 = T_ran[i_2]
+        T_2 = T_ran[i_1+1]
         T_list = [T_1, T_2]
 
         y1_1 = y1_ran[i_2]
